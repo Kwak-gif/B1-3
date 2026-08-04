@@ -1,0 +1,355 @@
+{
+  "name": "Gmail 긴급 메일 분기 알림",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "id": "25ee153c-7a6f-44f8-81e2-a965aa38b2ad",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        224
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6dLT7FAZyJcsylxo",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "urgent",
+              "leftValue": "={{ $json.Subject }}",
+              "rightValue": "긴급",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "607368d8-30b1-48b9-8a4f-ef40c3edf2ab",
+      "name": "IF 긴급",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://discordapp.com/api/webhooks/1534040086671523901/ahxnNQ5YMFnPadT4XJeGI5ZJdzeZDrrSfqKDtf1TVAKWElh7QyBEKtj-176pPvc5-Br-",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"content\": \"🚨 긴급 메일 수신\\n제목: \" + $json.Subject + \"\\n보낸사람: \" + $json.From + \"\\n미리보기: \" + $json.snippet } }}",
+        "options": {}
+      },
+      "id": "3f5f66bc-9dd3-4023-af1d-3167d5b4fe65",
+      "name": "Discord 긴급 알림",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "수신시각",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "보낸 사람",
+              "value": "={{ $(\"Gmail Trigger\").item.json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "제목",
+              "value": "={{ $(\"Gmail Trigger\").item.json.Subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf3011bc-b277-4882-a903-188f7238088c",
+      "name": "긴급 행 구성",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        656,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1t5WJdeETx0qR-3IA_KC6t3bv_B4cIUUdOSHUB8Ys62M/edit?gid=1567608049#gid=1567608049"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "긴급_n8n"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "schema": [
+            {
+              "id": "수신시각",
+              "displayName": "수신시각",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "보낸 사람",
+              "displayName": "보낸 사람",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "제목",
+              "displayName": "제목",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9c42778-f053-41db-86b4-d466ce65ad27",
+      "name": "Google Sheets 긴급 시트",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        880,
+        32
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YYNlTYj9KO26j8Ji",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "수신시각",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "보낸 사람",
+              "value": "={{ $(\"Gmail Trigger\").item.json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "제목",
+              "value": "={{ $(\"Gmail Trigger\").item.json.Subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "29cadc92-2f15-4bce-80e3-2cf8407920d8",
+      "name": "일반 행 구성",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1t5WJdeETx0qR-3IA_KC6t3bv_B4cIUUdOSHUB8Ys62M/edit?gid=470801599#gid=470801599"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "일반_n8n"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "schema": [
+            {
+              "id": "수신시각",
+              "displayName": "수신시각",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "보낸 사람",
+              "displayName": "보낸 사람",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "제목",
+              "displayName": "제목",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b0600a8-52a7-452d-81ef-3236db1f8b88",
+      "name": "Google Sheets 일반 시트",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YYNlTYj9KO26j8Ji",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "IF 긴급",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 긴급": {
+      "main": [
+        [
+          {
+            "node": "Discord 긴급 알림",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "일반 행 구성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord 긴급 알림": {
+      "main": [
+        [
+          {
+            "node": "긴급 행 구성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "긴급 행 구성": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets 긴급 시트",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "일반 행 구성": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets 일반 시트",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0bcda6c9-1eb4-4447-a794-5be33be48f73",
+  "meta": {
+    "instanceId": "415b999635463c155f272a72cb39eb88fb93dd84cda23ff874a61444d3395244"
+  },
+  "nodeGroups": [],
+  "id": "1KMmHWG2cr0CIocc",
+  "tags": []
+}
